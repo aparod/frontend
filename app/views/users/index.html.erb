@@ -1,0 +1,7 @@
+Hey, here we go!
+
+<pre><%= @users.to_yaml %></pre>
+
+<% @users.each do |u| %>
+  <%= u.first_name %> <%= u.last_name %> (<%= u.username %>)<br/>
+<% end %>
