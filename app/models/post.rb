@@ -1,3 +1,3 @@
-class User
+class Post
   include Stub
 end
