@@ -23,18 +23,28 @@ module Stub
         :method_args => args
       )
 
+      process data
+    end
+
+    def process(data)
       if data.is_a? Array
-        data.map { |e| self.from_json(e) }
-      elsif data.nil?
-        nil
+        data.map do |e|
+          process e
+        end
+      elsif data.is_a? Hash
+        build data
       else
-        self.from_json data
+        data
       end
     end
 
-    def from_json(json)
-      obj = self.new
-      json.each { |key, value| obj.send "#{key}=", value }
+    def build(hash)
+      class_name = hash.keys.first
+      class_data = hash[class_name]
+      klass      = class_name.to_s.camelcase.constantize
+
+      obj = klass.new
+      class_data.each { |key, value| obj.send "#{key}=", value }
       obj
     end
 
@@ -53,9 +63,10 @@ module Stub
       :object_state => self.to_hash
     )
 
-    data[:object_state].each { |key, value| send "#{key}=", value }
+    root_node = data[:object_state].keys.first
+    data[:object_state][root_node].each { |key, value| send "#{key}=", value }
 
-    data[:return_value]
+    self.class.process data[:return_value]
   end
 
   def to_hash
